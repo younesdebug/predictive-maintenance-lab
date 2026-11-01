@@ -1,99 +1,114 @@
-# Recurrent Neural Networks for Predictive Maintenance
-* Author: Umberto Griffo
-* Twitter: @UmbertoGriffo
+# Predictive Maintenance Lab
 
-## Colab
-You can try the code directly on [Colab](https://colab.research.google.com/drive/1tjIOud2Cc6smmvZsbl-QDBA6TLA2iEtd).
-Save a copy in your drive and enjoy It!
+**Maintenance prédictive · Python · Random Forest · Évaluation reproductible · Streamlit**
 
-## Software Environment
-* Python 3.6
-* numpy 1.13.3
-* scipy 0.19.1
-* matplotlib 2.0.2
-* spyder 3.2.3
-* scikit-learn 0.19.0
-* h5py 2.7.0 
-* Pillow 4.2.1 
-* pandas 0.20.3
-* TensorFlow 1.3.0
-* [Keras 2.1.1](https://keras.io)
+Adaptation de portfolio maintenue par **Younes Radouani**, élève ingénieur IA à l’EMSI Casablanca.
+Fork de [Predictive-Maintenance-using-LSTM](https://github.com/umbertogriffo/Predictive-Maintenance-using-LSTM)
+d’**Umberto Griffo**, sous [licence MIT](LICENSE). Le code et l’historique d’origine sont conservés.
 
-## Problem Description
-In this example, I build an LSTM network in order to predict remaining useful life (or time to failure) of aircraft engines <a href="https://ti.arc.nasa.gov/tech/dash/groups/pcoe/prognostic-data-repository/#turbofan">[3]</a> based on the scenario described at <a href="https://github.com/Azure/lstms_for_predictive_maintenance/blob/master/Deep%20Learning%20Basics%20for%20Predictive%20Maintenance.ipynb">[1]</a> and <a href="https://gallery.azure.ai/Experiment/Predictive-Maintenance-Step-2A-of-3-train-and-evaluate-regression-models-2">[2]</a>.
-The network uses simulated aircraft sensor values to predict when an aircraft engine will fail in the future allowing maintenance to be planned in advance.
-The question to ask is "Given these aircraft engine operation and failure events history, can we predict when an in-service engine will fail?"
-We re-formulate this question into two closely relevant questions and answer them using two different types of machine learning models:
+## Le problème
 
-	* Regression models: How many more cycles an in-service engine will last before it fails?
-	* Binary classification: Is this engine going to fail within w1 cycles?
+À partir de mesures de capteurs, identifier les moteurs simulés qui atteindront la panne
+ dans les **30 prochains cycles**. Le tableau de bord permet d’explorer les alertes,
+les erreurs du modèle et les variables importantes.
 
-## Data Summary
-In the **Dataset** directory, there are the training, test and ground truth datasets.
-The training data consists of **multiple multivariate time series** with "cycle" as the time unit, together with 21 sensor readings for each cycle.
-Each time series can be assumed to be generated from a different engine of the same type.
-The testing data has the same data schema as the training data.
-The only difference is that the data does not indicate when the failure occurs.
-Finally, the ground truth data provides the number of remaining working cycles for the engines in the testing data.
-The following picture shows a sample of the data: 
-<p align="center">
-  <img src="https://github.com/umbertogriffo/Predictive-Maintenance-using-LSTM/blob/master/Output/datasetSample.png"/>
-</p>
-You can find more details about the data at <a href="https://github.com/Azure/lstms_for_predictive_maintenance/blob/master/Deep%20Learning%20Basics%20for%20Predictive%20Maintenance.ipynb">[1]</a> and <a href="https://gallery.azure.ai/Experiment/Predictive-Maintenance-Step-2A-of-3-train-and-evaluate-regression-models-2">[2]</a>.
+**Démonstration sur un benchmark public**, sans déploiement industriel ni validation médicale.
+Ce dépôt est indépendant du projet de stage SmartDialysis IA.
 
-## Experimental Results
-### Results of Regression model
+## Apports de cette version
 
-|Mean Absolute Error|Coefficient of Determination (R^2)|
-|----|----|
-|12|0.7965|
+| Élément | Implémentation ajoutée |
+| --- | --- |
+| Pipeline ML | Validation des données, cible explicite, Random Forest et baseline naïve |
+| Validation | Moteurs séparés entre apprentissage et validation ; identifiants et cible exclus des entrées |
+| Seuil | Choisi sur validation selon le F2, puis figé avant le test externe |
+| Interface | Streamlit en français : filtres, export CSV et matrice de confusion |
+| Traçabilité | Paramètres, versions, identifiants de partition et SHA-256 des données |
+| Qualité | 10 tests automatisés : pipeline, cas invalides, reproductibilité et interface |
 
-The following pictures show the trend of loss Function, Mean Absolute Error, R^2 and actual data compared to predicted data: 
-<p align="center">
-  <img src="https://github.com/umbertogriffo/Predictive-Maintenance-using-LSTM/blob/master/Output/model_regression_loss.png"/>
-</p>
-<p align="center">
-  <img src="https://github.com/umbertogriffo/Predictive-Maintenance-using-LSTM/blob/master/Output/model_mae.png"/>
-</p>
-<p align="center">
-  <img src="https://github.com/umbertogriffo/Predictive-Maintenance-using-LSTM/blob/master/Output/model_r2.png"/>
-</p>
-<p align="center">
-  <img src="https://github.com/umbertogriffo/Predictive-Maintenance-using-LSTM/blob/master/Output/model_regression_verify.png"/>
-</p>
-         
-### Results of Binary classification 
+Le nouveau module fonctionne sur CPU, sans compte cloud, clé API ou GPU.
 
-|Accuracy|Precision|Recall|F-Score|
-|----|----|----|----|
-|0.97|0.92|1.0|0.96|
+## Démarrage rapide
 
-The following pictures show the trend of loss Function, Accuracy and actual data compared to predicted data: 
-<p align="center">
-  <img src="https://github.com/umbertogriffo/Predictive-Maintenance-using-LSTM/blob/master/Output/model_loss.png"/>
-</p>
-<p align="center">
-  <img src="https://github.com/umbertogriffo/Predictive-Maintenance-using-LSTM/blob/master/Output/model_accuracy.png"/>
-</p>
-<p align="center">
-  <img src="https://github.com/umbertogriffo/Predictive-Maintenance-using-LSTM/blob/master/Output/model_verify.png?raw=true"/>
-</p>
+Environnement vérifié : **Python 3.12**. Versions fixées dans `requirements.txt`.
 
-## Extensions
-We can also create a model to determine if the failure will occur in different time windows, for example, fails in the window (1,w0) or fails in the window (w0+1, w1) days, and so on. This will then be a multi-classification problem, and data will need to be preprocessed accordingly. 
+```bash
+git clone https://github.com/younesdebug/predictive-maintenance-lab.git
+cd predictive-maintenance-lab
+python -m venv .venv
+```
 
-## Who is citing this work?
+Activation sur Linux/macOS : `source .venv/bin/activate`.
+Sur Windows PowerShell : `.venv/Scripts/Activate.ps1`.
 
-* In chapter 10 of [Hands-On Artificial Intelligence for IoT](https://www.amazon.it/Hands-Artificial-Intelligence-IoT-techniques/dp/1788836065) book
-	* https://github.com/PacktPublishing/Hands-On-Artificial-Intelligence-for-IoT/tree/master/Chapter10
-* In chapter 7 of [Mobile and Wireless Communications with Practical Use-Case Scenarios](https://www.amazon.com/Wireless-Communications-Practical-Use-Case-Scenarios/dp/1032119020) book
-	* https://www.google.pt/books/edition/Mobile_and_Wireless_Communications_with/lvqhEAAAQBAJ?hl=en&gbpv=1
-* In `Using Recurrent Neural Networks to predict the time for an event` master's thesis (Universitat de Barcelona, Barcelona, Spain). Retrieved from [here](http://diposit.ub.edu/dspace/bitstream/2445/134691/3/memoria.pdf)
-* In `Exploring Cloud Assisted Tiny Machine Learning Application Patterns for PHM Scenario`. Retrieved from [here](https://www.dre.vanderbilt.edu/~gokhale/WWW/papers/PHM21_TinyML_Prognostics.pdf) and [here](https://www.researchgate.net/publication/356519569_The_Future_of_PHM_Could_be_Tiny_under_Cloud_Exploring_Potential_Application_Patterns_of_TinyML_in_PHM_Scenarios)
+```bash
+python -m pip install -r requirements.txt
+python -m streamlit run app.py
+```
 
-## References
+Les rapports de référence sont inclus : l’interface s’ouvre sans réentraînement.
+Pour recalculer les résultats et lancer les tests :
 
-- [1] Deep Learning for Predictive Maintenance https://github.com/Azure/lstms_for_predictive_maintenance/blob/master/Deep%20Learning%20Basics%20for%20Predictive%20Maintenance.ipynb
-- [2] Predictive Maintenance: Step 2A of 3, train and evaluate regression models https://gallery.azure.ai/Experiment/Predictive-Maintenance-Step-2A-of-3-train-and-evaluate-regression-models-2
-- [3] A. Saxena and K. Goebel (2008). "Turbofan Engine Degradation Simulation Data Set", NASA Ames Prognostics Data Repository (https://ti.arc.nasa.gov/tech/dash/groups/pcoe/prognostic-data-repository/#turbofan), NASA Ames Research Center, Moffett Field, CA 
-- [4] Understanding LSTM Networks http://colah.github.io/posts/2015-08-Understanding-LSTMs/
+```bash
+python -m maintenance.train --seed 42 --horizon 30 --trees 200
+python -m unittest discover -s tests -v
+```
+
+## Résultats mesurés
+
+Exécution du **1er novembre 2026**, graine 42, 200 arbres, seuil **0,30**.
+Test externe : **100 moteurs**, une observation finale par moteur, dont **25 positifs**.
+
+| Mesure | Random Forest | Baseline naïve (fréquence de classe) |
+| --- | ---: | ---: |
+| Précision des alertes | 81,48 % | 0 %* |
+| Rappel | 88,00 % | 0 % |
+| F2 | 0,8661 | 0 |
+| Average precision | 0,9599 | 0,25 |
+| ROC AUC | 0,9851 | 0,50 |
+| Vrais positifs / faux négatifs | 22 / 3 | 0 / 25 |
+| Faux positifs / vrais négatifs | 5 / 70 | 0 / 75 |
+
+*La baseline ne déclenche aucune alerte au seuil retenu ; la précision est définie à zéro par convention.*
+
+[Rapport complet](reports/metrics.json) · [Prédictions individuelles](reports/test_predictions.csv)
+
+Ces chiffres proviennent de la nouvelle baseline ; les résultats LSTM historiques **n’ont pas été réexécutés**.
+
+## Protocole et limites
+
+1. Construire la cible `RUL <= 30` sur les trajectoires d’entraînement complètes.
+2. Réserver 25 % des moteurs à la validation avec `GroupShuffleSplit`.
+3. Apprendre sur les autres moteurs et choisir le seuil maximisant le F2 sur validation.
+4. Réentraîner sur l’ensemble d’entraînement en conservant ce seuil.
+5. Évaluer la dernière observation de chaque moteur du test externe.
+
+Le F2 privilégie le rappel. Le choix réel du seuil nécessiterait une analyse des coûts.
+Les scores ne sont pas calibrés et une seule partition est présentée. La validation par cycle
+et le test par moteur ont des distributions différentes : leurs métriques ne sont pas directement
+comparables. L’importance des variables n’établit pas de causalité.
+
+[Fiche du modèle](docs/MODEL_CARD.md) · [Guide technique pour l’entretien](docs/TECHNICAL_GUIDE.md)
+
+## Organisation
+
+| Chemin | Rôle |
+| --- | --- |
+| `maintenance/` | Nouveau module de préparation, entraînement et évaluation |
+| `app.py` | Nouveau tableau de bord de lecture des résultats |
+| `tests/` | Tests du module et de l’interface |
+| `reports/` | Résultats réellement générés par la baseline |
+| `Dataset/` | Données présentes dans le dépôt d’origine |
+| `src/lstm/`, `Output/` | Code et sorties LSTM historiques, non réexécutés |
+| `docs/UPSTREAM_README.md` | README original conservé |
+
+Les nouvelles dépendances ne remettent pas à niveau l’ancien code Keras/TensorFlow.
+L’application ne charge aucun des modèles `.h5` historiques.
+
+## Sources et attribution
+
+- Projet d’origine : **Umberto Griffo**, [Predictive-Maintenance-using-LSTM](https://github.com/umbertogriffo/Predictive-Maintenance-using-LSTM), MIT.
+- Données citées par le projet d’origine : **A. Saxena et K. Goebel (2008), Turbofan Engine Degradation Simulation Data Set**, NASA Ames Prognostics Data Repository. Les fichiers hérités sont conservés sans modification ; voir le [README original](docs/UPSTREAM_README.md).
+- Adaptation de portfolio maintenue par **Younes Radouani**, développée avec assistance IA. Le périmètre est détaillé dans [PROVENANCE.md](docs/PROVENANCE.md).
+
+[GitHub](https://github.com/younesdebug) · [LinkedIn](https://www.linkedin.com/in/younes-radouani-a41723327/)
